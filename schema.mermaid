@@ -1,0 +1,32 @@
+graph TD
+    subgraph "Исходные файлы"
+        A1(site.json <br> Глобальные настройки: <br> цвета, шрифты, брейкпоинты)
+        B1(components/ <br> Каталоги компонентов)
+        C1(header/ <br> header.php, header.json)
+        D1(main/ <br> main.php, main.json)
+    end
+
+    subgraph "Процесс разработки (Локальный PHP сервер)"
+        A1 --> E{Утилита <br> генерации CSS}
+        E --> F[css/base.css <br> с CSS-переменными]
+        B1 --> G{PHP Рендеринг}
+        F --> G
+        G --> H((Динамический сайт <br> для разработки))
+    end
+
+    subgraph "Процесс сборки (Статическая генерация)"
+        I{Скрипт сборки}
+        H -- Компиляция --> I
+        I --> J[Объединение и <br> минимизация CSS]
+        I --> K[Объединение и <br> минимизация JS]
+        I --> L[Генерация <br> статического HTML]
+    end
+
+    subgraph "Финальный результат (папка /build)"
+        J --> M[style.min.css]
+        K --> N[script.min.js]
+        L --> O[index.html]
+    end
+
+    B1 -.-> C1
+    B1 -.-> D1
