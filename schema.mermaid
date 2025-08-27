@@ -1,19 +1,19 @@
 graph TD
     subgraph Уровень 'Оболочки'
-        A[index.html<br>(Каркас окна)]
-        B[renderer.ts<br>(Логика окна)]
+        A{index.html<br>Каркас окна}
+        B{renderer.ts<br>Логика окна}
 
         A -- Строит UI --> B
         B -- Загружает скрипт --> A
         B -- Обновляет лог --> A
 
-        style A fill:#E6E6FA,stroke:#9370DB,stroke-width:2px,color:#333
-        style B fill:#E6E6FA,stroke:#9370DB,stroke-width:2px,color:#333
+        style A fill:#E6E6FA,stroke:#9370DB,stroke-width:2px,color:#333333
+        style B fill:#E6E6FA,stroke:#9370DB,stroke-width:2px,color:#333333
     end
 
     subgraph Уровень 'Оркестратора'
-        C[preload.ts<br>(Мост)]
-        D[main.ts<br>(Главный процесс)]
+        C{preload.ts<br>Мост}
+        D{main.ts<br>Главный процесс}
 
         C -- IPC Вызов get-config --> D
         C -- IPC Вызов start-processing --> D
@@ -21,14 +21,14 @@ graph TD
         D -- Отправляет лог в UI<br>update-log --> C
         D -- Возвращает Promise --> C
 
-        style C fill:#E6E6FA,stroke:#9370DB,stroke-width:2px,color:#333
-        style D fill:#E6E6FA,stroke:#9370DB,stroke-width:2px,color:#333
+        style C fill:#E6E6FA,stroke:#9370DB,stroke-width:2px,color:#333333
+        style D fill:#E6E6FA,stroke:#9370DB,stroke-width:2px,color:#333333
     end
 
-    subgraph Уровень 'Ядра' (Logic)
-        E[processor.ts<br>(Обработчик файлов)]
-        F[config.json<br>(Конфигурация)]
-        G[/core/steps/*.ts<br>(Атомы)]
+    subgraph Уровень 'Ядра'
+        E{processor.ts<br>Обработчик файлов}
+        F{config.json<br>Конфигурация}
+        G{/core/steps/*.ts<br>Атомы}
 
         D -- Вызывает обработчик для<br>каждого файла --> E
         E -- Возвращает отчет --> D
@@ -38,7 +38,7 @@ graph TD
         F -- Читает настройки из --> E
         F -- Возвращает данные --> E
 
-        style E fill:#E6E6FA,stroke:#9370DB,stroke-width:2px,color:#333
-        style F fill:#E6E6FA,stroke:#9370DB,stroke-width:2px,color:#333
-        style G fill:#E6E6FA,stroke:#9370DB,stroke-width:2px,color:#333
+        style E fill:#E6E6FA,stroke:#9370DB,stroke-width:2px,color:#333333
+        style F fill:#E6E6FA,stroke:#9370DB,stroke-width:2px,color:#333333
+        style G fill:#E6E6FA,stroke:#9370DB,stroke-width:2px,color:#333333
     end
