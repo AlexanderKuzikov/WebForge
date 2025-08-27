@@ -1,44 +1,32 @@
 graph TD
-    subgraph Уровень 'Оболочки'
-        A{index.html<br>Каркас окна}
-        B{renderer.ts<br>Логика окна}
-
-        A -- Строит UI --> B
-        B -- Загружает скрипт --> A
-        B -- Обновляет лог --> A
-
-        style A fill:#E6E6FA,stroke:#9370DB,stroke-width:2px,color:#333333
-        style B fill:#E6E6FA,stroke:#9370DB,stroke-width:2px,color:#333333
+    subgraph "Исходные файлы"
+        A1(site.json <br> Глобальные настройки: <br> цвета, шрифты, брейкпоинты)
+        B1(components/ <br> Каталоги компонентов)
+        C1(header/ <br> header.php, header.json)
+        D1(main/ <br> main.php, main.json)
     end
 
-    subgraph Уровень 'Оркестратора'
-        C{preload.ts<br>Мост}
-        D{main.ts<br>Главный процесс}
-
-        C -- IPC Вызов get-config --> D
-        C -- IPC Вызов start-processing --> D
-        D -- Отправляет конфиг --> C
-        D -- Отправляет лог в UI<br>update-log --> C
-        D -- Возвращает Promise --> C
-
-        style C fill:#E6E6FA,stroke:#9370DB,stroke-width:2px,color:#333333
-        style D fill:#E6E6FA,stroke:#9370DB,stroke-width:2px,color:#333333
+    subgraph "Процесс разработки (Локальный PHP сервер)"
+        A1 --> E{Утилита <br> генерации CSS}
+        E --> F[css/base.css <br> с CSS-переменными]
+        B1 --> G{PHP Рендеринг}
+        F --> G
+        G --> H((Динамический сайт <br> для разработки))
     end
 
-    subgraph Уровень 'Ядра'
-        E{processor.ts<br>Обработчик файлов}
-        F{config.json<br>Конфигурация}
-        G{/core/steps/*.ts<br>Атомы}
-
-        D -- Вызывает обработчик для<br>каждого файла --> E
-        E -- Возвращает отчет --> D
-
-        E -- Использует нужные<br>функции --> G
-        E -- Читает файл --> F
-        F -- Читает настройки из --> E
-        F -- Возвращает данные --> E
-
-        style E fill:#E6E6FA,stroke:#9370DB,stroke-width:2px,color:#333333
-        style F fill:#E6E6FA,stroke:#9370DB,stroke-width:2px,color:#333333
-        style G fill:#E6E6FA,stroke:#9370DB,stroke-width:2px,color:#333333
+    subgraph "Процесс сборки (Статическая генерация)"
+        I{Скрипт сборки}
+        H -- Компиляция --> I
+        I --> J[Объединение и <br> минимизация CSS]
+        I --> K[Объединение и <br> минимизация JS]
+        I --> L[Генерация <br> статического HTML]
     end
+
+    subgraph "Финальный результат (папка /build)"
+        J --> M[style.min.css]
+        K --> N[script.min.js]
+        L --> O[index.html]
+    end
+
+    B1 -.-> C1
+    B1 -.-> D1
