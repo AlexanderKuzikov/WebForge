@@ -1,32 +1,38 @@
 graph TD
-    subgraph "Исходные файлы"
-        A1(site.json <br> Глобальные настройки: <br> цвета, шрифты, брейкпоинты)
-        B1(components/ <br> Каталоги компонентов)
-        C1(header/ <br> header.php, header.json)
-        D1(main/ <br> main.php, main.json)
+    subgraph "Исходные данные и компоненты"
+        A["webforge.json <br> Единый источник правды: <br> Структура сайта, данные страниц, <br> глобальные настройки (тема, навигация)"]
+        B["components/ <br> PHP-компоненты, <br> JSON-данные компонентов, <br> локальный JS, CSS"]
+        C["layouts/ <br> PHP-макеты страниц"]
     end
 
-    subgraph "Процесс разработки (Локальный PHP сервер)"
-        A1 --> E{Утилита <br> генерации CSS}
-        E --> F[css/base.css <br> с CSS-переменными]
-        B1 --> G{PHP Рендеринг}
-        F --> G
-        G --> H((Динамический сайт <br> для разработки))
+    subgraph "Фаза генерации сайта для разработки"
+        A --> D{"webforge_php_generator.php <br> (Скрипт-генератор PHP-сайта)"}
+        B --> D
+        C --> D
+        D --> E["_dev_site/ <br> (Сгенерированный PHP-сайт <br> для разработки)"]
+    end
+
+    subgraph "Процесс разработки (Локальный PHP-сервер)"
+        E --> F(("<br>PHP-сервер <br> для локальной разработки и отладки<br>"))
     end
 
     subgraph "Процесс сборки (Статическая генерация)"
-        I{Скрипт сборки}
-        H -- Компиляция --> I
-        I --> J[Объединение и <br> минимизация CSS]
-        I --> K[Объединение и <br> минимизация JS]
-        I --> L[Генерация <br> статического HTML]
+        F -- "Обход и захват HTML" --> G{"build.php <br> (Скрипт статической сборки)"}
+        G --> H["Генерация <br> статического HTML-контента"]
+        G --> I["Объединение и <br> минимизация CSS"]
+        G --> J["Объединение и <br> минимизация JS"]
     end
 
     subgraph "Финальный результат (папка /build)"
-        J --> M[style.min.css]
-        K --> N[script.min.js]
-        L --> O[index.html]
+        H --> K["build/index.html <br> и другие .html файлы"]
+        I --> L["build/style.min.css"]
+        J --> M["build/script.min.js"]
     end
 
-    B1 -.-> C1
-    B1 -.-> D1
+    style A fill:#f9f,stroke:#333,stroke-width:2px
+    style E fill:#ccf,stroke:#333,stroke-width:2px
+    style F fill:#9cf,stroke:#333,stroke-width:2px
+    style G fill:#ffc,stroke:#333,stroke-width:2px
+    style K fill:#cfc,stroke:#333,stroke-width:2px
+    style L fill:#cfc,stroke:#333,stroke-width:2px
+    style M fill:#cfc,stroke:#333,stroke-width:2px
