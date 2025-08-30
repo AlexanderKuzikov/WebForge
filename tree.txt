@@ -1,0 +1,20 @@
+_dev_site/
+├── index.php             <-- Основной роутер или редирект на index.html
+├── _config.php           <-- Загрузка webforge.json в PHP-переменные (для global data, etc)
+├── pages/
+│   ├── index.php         <-- Сгенерированный PHP-файл для главной страницы
+│   ├── about/
+│   │   └── index.php     <-- Сгенерированный PHP-файл для страницы "О нас"
+│   └── contact/
+│       └── index.php     <-- Сгенерированный PHP-файл для страницы "Контакты"
+├── layouts/
+│   ├── default.php       <-- Макет default, который был в components/layouts/default
+│   └── full-width.php    <-- Макет full-width
+├── components/           <-- Копии оригинальных PHP-файлов компонентов (или симлинки)
+│   ├── header/
+│   │   └── header.php
+│   ├── hero-section/
+│   │   └── hero-section.php
+│   └── text-block/
+│       └── text-block.php
+└── assets/               <-- Копии изображений, шрифтов, глобальных CSS/JS
