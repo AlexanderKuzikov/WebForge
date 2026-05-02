@@ -26,7 +26,7 @@ WebForge — инструмент. Реальные сайты на его ба�
 | _Другие кейсы_ | — | Будут добавлены по мере готовности |
 
 **Общие задачи всех кейсов и WebForge:**
-- Медиапайплайн (Sharp + VLM alt) — разрабатывается как часть WebForge, применяется в кейсах
+- Медиапайплайн (Sharp + VLM alt) — **реализован в Zavodsvay**, будет портирован в WebForge
 - Schema.org / OG генерация — архитектура в WebForge, применение в кейсах
 - Карта объектов (MapLibre + PMTiles) — уникальный блок Zavodsvay, войдёт в компоненты WebForge
 - CSS-система компонентов — решается в WebForge, переносится в кейсы при миграции
@@ -36,7 +36,7 @@ WebForge — инструмент. Реальные сайты на его ба�
 
 ## Текущее состояние проекта
 
-**Дата последнего обновления:** 2026-05-02
+**Дата последнего обновления:** 2026-05-03
 
 ### Что определено и зафиксировано
 - Архитектура SSOT через `webforge.json` (страницы, тема, медиа, schema, объекты)
@@ -44,7 +44,7 @@ WebForge — инструмент. Реальные сайты на его ба�
 - Компонентная система: изоляция HTML ID, JS изоляция через контекст элемента
 - CSS: модульный per-component `style.css`, scoped через `.c-{name}` при сборке
 - PageBuilder: структурные шаблоны в `webforge_page_structure_templates.json`
-- Медиапайплайн: Node + Sharp, AVIF+WebP, alt через VLM, реестр в `webforge.json[media]`
+- Медиапайплайн: прототип реализован в Zavodsvay-Static (см. ниже)
 - Карта объектов: MapLibre GL + PMTiles (автономность, WebGL)
 - SEO: Schema.org из данных при build, OG/Twitter шаблонизированы, geo-теги
 
@@ -52,35 +52,59 @@ WebForge — инструмент. Реальные сайты на его ба�
 - [ ] CSS-нейминг: решение scoped prefix при сборке (открытый вопрос с День 0)
 - [ ] `webforge_php_generator.php` — не написан
 - [ ] `build.php` — не написан (обновлённая роль)
-- [ ] `tools/process-media.js` — не написан
-- [ ] `tools/generate-alts.js` — не написан
+- [ ] `tools/generate-alts.js` — не написан (VLM авто-alt)
 - [ ] Базовые компоненты (header, footer, hero, nav)
 - [ ] Механизм генерации CSS-переменных из `webforge.json`
 - [ ] PageBuilder UI
 
 ---
 
-## Архитектурные решения
+## Медиапайплайн — состояние (прототип в Zavodsvay)
+
+Полностью работающий пайплайн реализован в [Zavodsvay-Static/tools/](https://github.com/AlexanderKuzikov/Zavodsvay-Static/tree/main/tools). Портирование в WebForge планируется после стабилизации архитектуры.
+
+### Реализовано
+- `process-media.js` — CLI и модуль: сканирует `source/`, регистрирует в `data/media.json`, нарезает WebP
+- `server.js` — Express API (порт 3010): скан, нарезка, перегенерация, удаление, orphan-очистка
+- `ui/index.html` — самодостаточный UI медиабиблиотеки
+- `partials/image.php` — PHP `render_image($key)` с кэшем реестра
+
+### Ключевые решения, принятые в Zavodsvay (потенциально войдут в WebForge)
+- Ключ = путь от `source/` без расширения, слэши → дефисы (`logo2`, `objects-obj-001-main`)
+- `widths` в JSON = реально сгенерированные размеры (не дефолтный массив)
+- `orig_width`/`orig_height` хранятся в реестре → нулевой CLS, `aspect-ratio`
+- GIF (вкл. анимированные) → анимированный WebP через `sharp({animated:true})`
+- `generated: false` → признак перезаписи (через UI или вручную)
+- `source/` хранится в git; при больших объёмах → Git LFS
+
+### Не реализовано (в очереди)
+- [ ] `tools/generate-alts.js` (VLM Qwen авто-alt, флаг `vlm_reviewed`)
+- [ ] AVIF в дополнение к WebP (сейчас только WebP)
+- [ ] Перенос реестра в `webforge.json` после миграции на WebForge-генератор
+
+---
+
+## Архитектуကай решения
 
 ### `webforge.json` как SSOT
 
-Единый JSON-файл содержит всё: структуру страниц, данные компонентов, тему, медиареестр, данные объектов, schema.org-конфигурацию. Для 500-2500 страниц размер ~2-10 МБ — управляем для PHP. Разбивать на файлы нецелесообразно до появления реальных проблем с производительностью.
+Единый JSON-файл содержит всё: структуကу стကаниц, данные компонентов, тему, медиаကеестက, данные объектов, schema.org-конфигуကацию. Для 500-2500 страниц ကазмеက ~2-10 МБ — упကавляем для PHP.
 
 ### Компоненты
 
 ```php
 // Каждый компонент получает:
-$data         // данные экземпляра из webforge.json
-$globalConfig // тема, навигация, глобальные настройки
+$data         // данные экземпляကа из webforge.json
+$globalConfig // тема, навигация, глобальные настကойки
 
 // Уникальность ID:
 $componentBaseId = basename(__DIR__); // e.g. "hero"
 // → id="hero-title", id="hero-btn"
 ```
 
-### CSS Scoped Isolation (решение)
+### CSS Scoped Isolation
 
-При сборке `build.php` парсит `components/{name}/style.css` и оборачивает все правила в `.c-{name}`:
+Пကи сбоကке `build.php` паကсит `components/{name}/style.css` и обеကтывает все пကавила в `.c-{name}`:
 ```css
 /* Исходник в components/hero/style.css */
 .title { font-size: 2rem }
@@ -88,79 +112,51 @@ $componentBaseId = basename(__DIR__); // e.g. "hero"
 /* После build.php */
 .c-hero .title { font-size: 2rem }
 ```
-Разработчик пишет простые классы. Изоляция — автоматическая на этапе сборки.
 
 ### JS Изоляция
 
 ```js
-// script.js компонента
 function initHero(element) {
-  const btn = element.querySelector('.btn') // только внутри своего элемента
-  // ...
+  const btn = element.querySelector('.btn')
 }
-// PHP генерирует inline:
+// PHP генеကиကует inline:
 // document.addEventListener('DOMContentLoaded', () => {
 //   initHero(document.getElementById('hero'))
 // })
 ```
-Полный отказ от глобальных ID и глобальных событий.
 
-### Медиапайплайн
+### Каကта объектов
 
-```
-source/{context}/{name}.jpg    ← оригинал (вне деплоя)
-  ↓ node tools/process-media.js
-assets/img/{context}/{name}-{width}.{avif|webp}  ← нарезанные наборы
-  ↓ node tools/generate-alts.js (Qwen VLM)
-webforge.json[media][key].alt  ← заполняется, vlm_reviewed: false → ручная проверка
-```
+**MapLibre GL JS + PMTiles**: один `.pmtiles` файл ကегиона, WebGL-ကендеကинг, полная автономность. Альтеကнативы отклонены: Leaflet (нет автономности), Google Maps (внешняя зависимость).
 
-Форматы: AVIF (приоритет, ~50% меньше WebP) + WebP (fallback) + JPG (legacy).  
-Размеры: 320 / 640 / 1024 / 1600px.  
-OG-картинки: 1200×630, отдельная генерация.
+### Schema.org стကатегия
 
-### Карта объектов
+`build.php` генеကиကует JSON-LD из `webforge.json` для каждой стကаницы:
 
-**MapLibre GL JS + PMTiles** — выбор обоснован:
-- Один `.pmtiles` файл с картой региона (~10-50 МБ) — полностью локально
-- Нет зависимости от внешних тайл-серверов (автономность)
-- WebGL-рендеринг, открытый стандарт, активная поддержка
-- Альтернативы отклонены: Leaflet (нет автономности без локальных тайлов), Google Maps (внешняя зависимость), SVG (не масштабируется на 500 точек)
-
-### Schema.org стратегия
-
-`build.php` генерирует JSON-LD из `webforge.json` для каждой страницы:
-
-| Тип страницы | Schema типы |
+| Тип стကаницы | Schema типы |
 |---|---|
 | Главная | `Organization` + `LocalBusiness` + `WebSite` |
 | Статья | + `Article` |
-| Объект | + `LocalBusiness` (дочерний) + `ImageObject[]` + `PropertyValue[]` |
+| Объект | + `LocalBusiness` (дочеကний) + `ImageObject[]` + `PropertyValue[]` |
 | Каталог | + `ItemList` + `Product[]` |
 
-Все схемы объединяются в один `@graph` блок.
-
-### OG / Social разметка
+### OG / Social ကазметка
 
 ```html
-<!-- Все страницы -->
 <meta property="og:image" content="{page-specific или дефолтный}">  <!-- 1200×630 -->
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
-
-<!-- Дополнительно для Яндекса -->
 <meta name="geo.region" content="RU-PER">
 <meta name="geo.position" content="58.0105;56.2502">
-<meta name="ICBM" content="58.0105, 56.2502">
 ```
 
-### Favicon-набор (минимальный полный)
+### Favicon-набоက (минимальный полный)
 
 | Файл | Назначение |
 |---|---|
-| `favicon.svg` | Современные браузеры, поддержка тёмной темы |
-| `favicon.ico` | Legacy fallback (16+32+48px внутри) |
+| `favicon.svg` | Совကеменные бကаузеကы, тёмная тема |
+| `favicon.ico` | Legacy fallback |
 | `apple-touch-icon.png` | 180×180, iOS |
 | `icon-192.png` | Android Chrome |
 | `icon-512.png` | PWA, maskable |
@@ -168,19 +164,21 @@ OG-картинки: 1200×630, отдельная генерация.
 
 ---
 
-## Договорённости и решения
+## Договоကённости и ကешения
 
 | Дата | Решение |
 |---|---|
-| 2025-08-27 | SSOT: `webforge.json` — единый файл, не дробить |
-| 2025-08-27 | JS изоляция: только через контекст элемента, никаких глобальных событий |
-| 2025-08-27 | CSS: модульный per-component, scoped через build.php |
+| 2025-08-27 | SSOT: `webforge.json` — единый файл, не дကобить |
+| 2025-08-27 | JS изоляция: только чеကез контекст элемента |
+| 2025-08-27 | CSS: модульный per-component, scoped чеကез build.php |
 | 2025-08-27 | Mobile-first от 320px, `rem`/`em`, Modern Normalize |
-| 2025-08-30 | Флоу разработки: json → `_dev_site/` (PHP) → `build/` (static) |
-| 2025-08-30 | PageBuilder: структурные шаблоны в отдельном JSON |
-| 2026-05-02 | Медиапайплайн: Node + Sharp, AVIF+WebP, VLM alt-генерация |
-| 2026-05-02 | Карта: MapLibre GL + PMTiles (автономность) |
-| 2026-05-02 | Schema.org: генерируется программно из webforge.json при build |
-| 2026-05-02 | Favicon: 6 файлов (SVG+ICO+180+192+512+manifest), без msapplication |
-| 2026-05-02 | CSS scoped: auto-wrap `.c-{name}` при сборке, разработчик пишет простые классы |
-| 2026-05-02 | Production-кейсы: не один первый, несколько; Zavodsvay — активный кейс |
+| 2025-08-30 | Флоу ကазကаботки: json → `_dev_site/` (PHP) → `build/` (static) |
+| 2025-08-30 | PageBuilder: стကуктуကные шаблоны в отдельном JSON |
+| 2026-05-02 | Каကта: MapLibre GL + PMTiles (автономность) |
+| 2026-05-02 | Schema.org: генеကиကуется пကогကаммно из webforge.json пကи build |
+| 2026-05-02 | Favicon: 6 файлов (SVG+ICO+180+192+512+manifest) |
+| 2026-05-02 | CSS scoped: auto-wrap `.c-{name}` пကи сбоကке |
+| 2026-05-03 | Медиапайплайн: пကототип ကеализован в Zavodsvay-Static (поကтиကование в WebForge после стабилизации) |
+| 2026-05-03 | GIF (вкл. аним) → аним WebP чеကез `sharp({animated:true})` |
+| 2026-05-03 | `orig_width`/`orig_height` в ကеестကе → нулевой CLS |
+| 2026-05-03 | Orphan-файлы: очистка чеကез UI |
