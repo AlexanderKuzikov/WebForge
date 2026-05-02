@@ -15,18 +15,22 @@
 
 ---
 
-## Связь с Zavodsvay-Static
+## Связь с production-кейсами
 
-**[Zavodsvay-Static](https://github.com/AlexanderKuzikov/Zavodsvay-Static)** — первый production-кейс WebForge.  
-Сейчас это **pre-static версия**: работает на минимальном PHP (file-router, layouts, partials) без генератора.  
-Когда WebForge будет готов — Zavodsvay-Static мигрирует на полноценный pipeline WebForge.
+WebForge — инструмент. Реальные сайты на его базе — production-кейсы. Каждый кейс проходит путь:
+**pre-static PHP** (file-router, layouts, partials, минимум PHP) → **WebForge pipeline** (после готовности генератора).
 
-**Общие задачи двух проектов:**
-- Медиапайплайн (Sharp + VLM alt) — разрабатывается как часть WebForge, применяется в Zavodsvay
-- Schema.org / OG генерация — архитектура в WebForge, применение в Zavodsvay
-- Карта 500 объектов (MapLibre + PMTiles) — уникальный блок Zavodsvay, войдёт в компоненты WebForge
-- CSS-система компонентов — решается в WebForge, переносится в Zavodsvay при миграции
-- sitemap.xml — в Zavodsvay сейчас вручную, в WebForge будет генерироваться при build
+| Проект | Статус | Описание |
+|---|---|---|
+| [Zavodsvay-Static](https://github.com/AlexanderKuzikov/Zavodsvay-Static) | 🟡 Pre-static (PHP) | Сайт завода «Гефест», Пермь. Активная разработка. |
+| _Другие кейсы_ | — | Будут добавлены по мере готовности |
+
+**Общие задачи всех кейсов и WebForge:**
+- Медиапайплайн (Sharp + VLM alt) — разрабатывается как часть WebForge, применяется в кейсах
+- Schema.org / OG генерация — архитектура в WebForge, применение в кейсах
+- Карта объектов (MapLibre + PMTiles) — уникальный блок Zavodsvay, войдёт в компоненты WebForge
+- CSS-система компонентов — решается в WebForge, переносится в кейсы при миграции
+- sitemap.xml — в кейсах сейчас вручную, в WebForge генерируется при build
 
 ---
 
@@ -179,3 +183,4 @@ OG-картинки: 1200×630, отдельная генерация.
 | 2026-05-02 | Schema.org: генерируется программно из webforge.json при build |
 | 2026-05-02 | Favicon: 6 файлов (SVG+ICO+180+192+512+manifest), без msapplication |
 | 2026-05-02 | CSS scoped: auto-wrap `.c-{name}` при сборке, разработчик пишет простые классы |
+| 2026-05-02 | Production-кейсы: не один первый, несколько; Zavodsvay — активный кейс |

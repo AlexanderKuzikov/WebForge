@@ -8,8 +8,6 @@
 
 WebForge — универсальный генератор статических сайтов с PHP-разработкой и нулевыми зависимостями на продакшене. Позволяет использовать любые инструменты локально (Node, Python, Go, VLM/LLM, Google Sheets, БД) — и генерировать чистый статический HTML/CSS/JS для деплоя на любой хостинг.
 
-**Первый production-кейс:** [Zavodsvay-Static](https://github.com/AlexanderKuzikov/Zavodsvay-Static) — сайт завода винтовых свай «Гефест», Пермь.
-
 ---
 
 ## Философия
@@ -172,6 +170,8 @@ php build.php
 | Проект | Статус | Описание |
 |---|---|---|
 | [Zavodsvay-Static](https://github.com/AlexanderKuzikov/Zavodsvay-Static) | 🟡 Pre-static (PHP) | Production-кейс WebForge. Сайт завода «Гефест», Пермь |
+
+_Другие production-кейсы существуют и будут добавлены в таблицу по мере готовности._
 
 ---
 
