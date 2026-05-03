@@ -18,6 +18,7 @@ WebForge — универсальный генератор статически�
 - **Минимум JavaScript** — приоритет HTML/CSS, `<details>`/`<summary>` вместо JS-аккордеонов
 - **PHP для разработки, статика для деплоя** — удобная отладка локально, нулевая серверная логика на хостинге
 - **SEO-first** — Critical CSS, Schema.org, OG-теги, семантика, скорость
+- **AI-friendly** — архитектура и документация оптимизированы для работы с AI-ассистентами
 
 ---
 
@@ -29,15 +30,17 @@ webforge.json              # SSOT — вся структура, контент,
 ├── layouts/               # Макеты страниц (main, home, wide...)
 ├── source/                # Оригиналы медиафайлов (вне деплоя)
 ├── tools/                 # Утилиты сборки
-│   ├── process-media.js   # Нарезка изображений (Node + Sharp): WebP + AVIF
-│   ├── generate-alts.js   # Генерация alt-текстов через локальную VLM
-│   └── generate-css.php   # CSS-переменные из webforge.json
+│   ├── process-media.js   # Нарезка изображений (Node + Sharp): WebP
+│   ├── generate-alts.js   # Генерация alt-текстов через локальную VLM (не реализовано)
+│   └── generate-css.php   # CSS-переменные из webforge.json (не реализовано)
 ├── _dev_site/             # Генерируемый PHP-сайт для разработки (gitignore)
 ├── build/                 # Финальная статическая сборка (gitignore)
-├── webforge_php_generator.php  # json → _dev_site/
-├── build.php              # _dev_site/ → build/ (HTML + минификация)
+├── webforge_php_generator.php  # json → _dev_site/ (не реализовано)
+├── build.php              # _dev_site/ → build/ (HTML + минификация) (не реализовано)
 └── webforge_page_structure_templates.json  # Структурные шаблоны для PageBuilder
 ```
+
+> **Статус:** Архитектура определена и зафиксирована. Core-инструменты (`webforge_php_generator.php`, `build.php`) находятся в очереди реализации после стабилизации production-кейса [Zavodsvay-Static](https://github.com/AlexanderKuzikov/Zavodsvay-Static).
 
 ---
 
@@ -46,18 +49,18 @@ webforge.json              # SSOT — вся структура, контент,
 ```
 webforge.json (SSOT)
   ↓
-tools/process-media.js      ← нарезка фото (Sharp: WebP + AVIF × 4 размера)
+tools/process-media.js      ← нарезка фото (Sharp: WebP × 4 размера)
 tools/generate-alts.js      ← alt-тексты через VLM (Qwen/Gemma локально)
   ↓
 webforge_php_generator.php  ← генерация _dev_site/ из json
   ↓
 php -S localhost:8000 -t _dev_site/   ← разработка + отладка
   ↓
-build.php                   ← _dev_site/ → build/ (минификация, Critical CSS, Schema, OG)
+build.php                   ← _dev_site/ → build/ (минификация, CSS scoping, Schema, OG, hashed assets)
   ↓
 build/                      ← чистый статический HTML/CSS/JS
   ↓
-FTP / GitHub Actions → хостинг
+GitHub Actions → FTP → хостинг
 ```
 
 ---
@@ -73,7 +76,10 @@ components/hero/
 ```
 
 Уникальность HTML ID: `$componentBaseId = basename(__DIR__)` + суффиксы.  
-JS изоляция: `DOMContentLoaded → querySelector → initComponent(element)`, никаких глобальных событий.
+JS изоляция: `DOMContentLoaded → querySelector → initComponent(element)`, никаких глобальных событий.  
+CSS scoping: `build.php` оборачивает все правила `style.css` в `.c-{name}` при сборке.
+
+> **Важно для AI:** Каждый компонент обязан документировать ожидаемую структуру `$data` в комментарии в начале `.php`-файла. Это контракт между компонентом и `webforge.json`.
 
 ---
 
@@ -102,10 +108,11 @@ JS изоляция: `DOMContentLoaded → querySelector → initComponent(eleme
   ],
   "media": {
     "hero-main": {
-      "source": "source/hero.jpg",
+      "file": "source/hero.jpg",
       "alt": "...",
       "widths": [320, 640, 1024, 1600],
-      "formats": ["avif", "webp"],
+      "orig_width": 1920,
+      "orig_height": 1080,
       "generated": false,
       "vlm_reviewed": false
     }
@@ -114,15 +121,19 @@ JS изоляция: `DOMContentLoaded → querySelector → initComponent(eleme
 }
 ```
 
+> **Открытый вопрос:** При росте сайта (500+ страниц + 500+ объектов + медиареестр) `webforge.json` может стать неудобным для редактирования. Рассматривается декомпозиция на namespace-файлы (`webforge.pages.json`, `webforge.objects.json`, `webforge.media.json`, `webforge.theme.json`) с merge при build. Решение будет принято после первого production-кейса.
+
 ---
 
 ## Медиапайплайн
 
 **Инструмент:** Node.js + [Sharp](https://sharp.pixelplumbing.com/) — индустриальный стандарт нарезки.  
-**Форматы:** AVIF (приоритет) + WebP (fallback) + JPG (legacy fallback).  
-**Размеры:** 320 / 640 / 1024 / 1600px.  
-**Alt-тексты:** локальная VLM (Qwen/Gemma) — генерация + флаг `vlm_reviewed` для ручной проверки.  
+**Форматы:** WebP (основной), JPG (source-оригиналы).  
+**Размеры:** 320 / 640 / 1024 / 1600px (фактически сгенерированные ≤ ширины оригинала).  
+**Alt-тексты:** локальная VLM (Qwen/Gemma) — генерация + флаг `vlm_reviewed` для ручной проверки (в очереди).  
 **OG-картинки:** 1200×630, генерируются отдельно для каждой страницы при наличии данных.
+
+Прототип полностью реализован в [Zavodsvay-Static/tools/](https://github.com/AlexanderKuzikov/Zavodsvay-Static/tree/main/tools). Портирование в WebForge — после стабилизации архитектуры.
 
 ---
 
@@ -133,7 +144,8 @@ JS изоляция: `DOMContentLoaded → querySelector → initComponent(eleme
 - **Geo-теги** — `geo.region`, `geo.position`, `ICBM` для Яндекса
 - **Favicon** — SVG + ICO + apple-touch-icon + `site.webmanifest`
 - **sitemap.xml** — генерируется при build из всех страниц `webforge.json`
-- **Programmatic SEO** — 500+ уникальных страниц объектов из данных + уникальные фото + уникальные alt
+- **Programmatic SEO** — 500+ уникальных страниц объектов из data-файла + уникальные фото + уникальные alt
+- **Hashed assets** — `style.{hash8}.css` при build для корректного cache-busting без CDN
 
 ---
 
@@ -169,9 +181,9 @@ php build.php
 
 | Проект | Статус | Описание |
 |---|---|---|
-| [Zavodsvay-Static](https://github.com/AlexanderKuzikov/Zavodsvay-Static) | 🟡 Pre-static (PHP) | Production-кейс WebForge. Сайт завода «Гефест», Пермь |
+| [Zavodsvay-Static](https://github.com/AlexanderKuzikov/Zavodsvay-Static) | 🟡 Pre-static (PHP) | Production-кейс #1. Сайт завода «Гефест», Пермь |
 
-_Другие production-кейсы существуют и будут добавлены в таблицу по мере готовности._
+_Другие production-кейсы будут добавлены по мере готовности._
 
 ---
 
