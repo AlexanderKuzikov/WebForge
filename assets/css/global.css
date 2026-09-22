@@ -1,0 +1,35 @@
+/* assets/css/global.css — глобальные стили WebForge.
+   Переменные генерируются из webforge.json theme (см. webforge.example.json).
+   Приём подсмотрен в Tailwind-пресете Storefront UI, но без Tailwind:
+   только :root-переменные + единый фокус на весь сайт. */
+
+:root {
+  --color-primary-100: #dcf5e6;
+  --color-primary-600: #1d7a4f;
+  --color-primary-700: #16603e;
+  --color-secondary-600: #4a7c59;
+  --color-neutral-100: #f3f4f1;
+  --color-neutral-200: #e5e7e0;
+  --color-neutral-500: #6b7268;
+  --color-neutral-700: #37413a;
+  --color-neutral-900: #1a211c;
+  --color-negative-700: #a4262c;
+  --color-warning-500: #c98a12;
+  --default-outline-color: #1d7a4f;
+  --default-outline-width: 2px;
+  --default-outline-offset: 2px;
+  --radius: 0.75rem;
+}
+
+/* Modern Normalize — минимум для компонентов */
+*, *::before, *::after { box-sizing: border-box; }
+html { font-size: 100%; }
+body { margin: 0; font-size: 1.125rem; line-height: 1.5; font-family: system-ui, sans-serif; color: var(--color-neutral-900); background: #fff; }
+img { max-width: 100%; height: auto; }
+
+/* Единый фокус на весь сайт (порт default-outline из Storefront UI) */
+:focus-visible {
+  outline: var(--default-outline-width) solid var(--default-outline-color);
+  outline-offset: var(--default-outline-offset);
+  border-radius: 0.25rem;
+}

@@ -1,0 +1,64 @@
+{
+  "_note": "Пример SSOT для прогона первых компонентов (product-card, filters). Полный webforge.json со страницами появится вместе с webforge_php_generator.php.",
+  "site": { "name": "Пример витрины", "lang": "ru", "currency": "₽" },
+  "theme": {
+    "colors": {
+      "primary-100": "#dcf5e6",
+      "primary-600": "#1d7a4f",
+      "primary-700": "#16603e",
+      "secondary-600": "#4a7c59",
+      "neutral-100": "#f3f4f1",
+      "neutral-200": "#e5e7e0",
+      "neutral-500": "#6b7268",
+      "neutral-700": "#37413a",
+      "neutral-900": "#1a211c",
+      "negative-700": "#a4262c",
+      "warning-500": "#c98a12"
+    },
+    "focus": { "color": "#1d7a4f", "width": "2px", "offset": "2px" },
+    "radius": "0.75rem",
+    "breakpoints": { "sm": "40em", "md": "48em" }
+  },
+  "sampleProduct": {
+    "title": "Кроссовки прогулочные «Алтай»",
+    "url": "/catalog/altai-sneakers/",
+    "image": { "src": "/assets/img/sneakers.webp", "alt": "Кроссовки прогулочные", "width": 300, "height": 300 },
+    "price": "12 450 ₽",
+    "old_price": null,
+    "rating": { "value": 5, "max": 5, "count": 123 },
+    "features": ["Лёгкие", "Не скользят", "Гибкая подошва"],
+    "badge": null,
+    "cta_text": "В корзину",
+    "instanceId": "demo-card-1"
+  },
+  "sampleFilters": {
+    "instanceId": "demo-filters-1",
+    "groups": [
+      {
+        "id": "size", "title": "Размер", "type": "size", "open": true,
+        "details": [
+          { "id": "s1", "label": "41", "value": "41", "counter": 10 },
+          { "id": "s2", "label": "42", "value": "42", "counter": 7 },
+          { "id": "s3", "label": "43", "value": "43", "counter": 0 },
+          { "id": "s4", "label": "44", "value": "44", "counter": 4 }
+        ]
+      },
+      {
+        "id": "brand", "title": "Бренд", "type": "checkbox", "open": true,
+        "details": [
+          { "id": "b1", "label": "Гефест", "value": "gefeste", "counter": 10 },
+          { "id": "b2", "label": "Алтай", "value": "altai", "counter": 100 },
+          { "id": "b3", "label": "Пирс", "value": "pirs", "counter": 0 }
+        ]
+      },
+      {
+        "id": "price", "title": "Цена", "type": "radio", "open": false,
+        "details": [
+          { "id": "pr1", "label": "До 5 000 ₽", "value": "under", "counter": 12 },
+          { "id": "pr2", "label": "5–15 000 ₽", "value": "5-15", "counter": 30 },
+          { "id": "pr3", "label": "От 15 000 ₽", "value": "above", "counter": 5 }
+        ]
+      }
+    ]
+  }
+}

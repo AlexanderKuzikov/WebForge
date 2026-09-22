@@ -52,27 +52,30 @@ WebForge — инструмент. Реальные сайты на его ба�
 
 ## Текущее состояние проекта
 
-**Дата последнего обновления:** 2026-05-03
+**Дата последнего обновления:** 2026-09-22
 
 ### Что определено и зафиксировано
 - Архитектура SSOT через `webforge.json` (страницы, тема, медиа, schema, объекты)
 - Флоу: `webforge.json → webforge_php_generator.php → _dev_site/ → build.php → build/`
 - Компонентная система: изоляция HTML ID, JS изоляция через контекст элемента
-- CSS: модульный per-component `style.css`, scoped через `.c-{name}` при сборке
+- CSS: модульный per-component `style.css`, scoped-классы пишутся сразу (`.c-{name}`)
 - PageBuilder: структурные шаблоны в `webforge_page_structure_templates.json`
 - Медиапайплайн: прототип реализован в Zavodsvay-Static (см. ниже)
 - Карта объектов: MapLibre GL + PMTiles (автономность, WebGL)
 - SEO: Schema.org из данных при build, OG/Twitter шаблонизированы, geo-теги
 - Hashed assets: `build.php` генерирует `style.{hash8}.css` для cache-busting
 - CI/CD: GitHub Actions → FTP-деплой (только изменённые файлы через `lftp mirror`)
+- Первые компоненты: `product-card`, `filters` (порт Blocks Storefront UI, код с нуля, см. решения 2026-09-22)
+- CSS-нейминг: scoped-классы пишутся сразу (`c-{name}__element`), авто-обёртка при сборке не нужна
+- Хелпер `tools/pagination.php` (порт `usePagination`, чистый PHP для data-driven страниц)
+- Пример SSOT: `webforge.example.json` + `assets/css/global.css` (тема вручную, генератор — позже)
 
 ### Что не реализовано (очередь)
-- [ ] CSS-нейминг: решение scoped prefix при сборке (открытый вопрос с День 0)
 - [ ] `webforge_php_generator.php` — не написан
 - [ ] `build.php` — не написан (обновлённая роль)
 - [ ] `tools/generate-alts.js` — не написан (VLM авто-alt)
-- [ ] Базовые компоненты (header, footer, hero, nav)
-- [ ] Механизм генерации CSS-переменных из `webforge.json`
+- [ ] Базовые компоненты (header, footer, hero, nav) — product-card и filters уже готовы
+- [ ] Генератор CSS-переменных из `webforge.json` (вручную задано в `assets/css/global.css`, автоматизация — в генераторе)
 - [ ] PageBuilder UI
 - [ ] JSON Schema / валидация контракта компонент ↔ `webforge.json`
 - [ ] GitHub Actions workflow для FTP-деплоя
@@ -90,25 +93,12 @@ WebForge — инструмент. Реальные сайты на его ба�
 - Б) Разбить на namespace-файлы (`webforge.pages.json`, `webforge.objects.json`, `webforge.media.json`, `webforge.theme.json`) — merge при build  
 **Статус:** Открытый. Решать после завершения Zavodsvay, когда будет ясен реальный объём.
 
-### 2. CSS naming convention для компонентов
-**Проблема:** Новые секции в Zavodsvay пишутся без scoped-prefix. При миграции в WebForge компонентный CSS потребует рефакторинга.  
-**Решение (предлагаемое):** Новые блоки CSS в Zavodsvay писать сразу в стиле `.c-{name}__element`, чтобы миграция была механической.  
-**Статус:** Открытый. Требует явного решения архитектора.
-
-### 3. CSS auto-wrap при сборке
-**Проблема:** `build.php` должен парсить CSS и оборачивать в `.c-{name}`. Regex-парсинг CSS ненадёжен (`@media`, `@keyframes`, `:root`, псевдоэлементы).  
-**Варианты:**  
-- А) Regex с явным списком исключений  
-- Б) Соглашение: в `style.css` компонента запрещены `@keyframes`, `:root` — выносятся в глобальный CSS  
-- В) Использовать PHP CSS-парсер (sabberworm/php-css-parser)  
-**Статус:** Открытый.
-
-### 4. Контракт компонент ↔ данные
+### 2. Контракт компонент ↔ данные
 **Проблема:** Нет валидации структуры `$data`, которую получает компонент. Ошибка обнаруживается только при build.  
 **Решение (предлагаемое):** JSON Schema для каждого компонента + валидация в `webforge_php_generator.php` на старте.  
 **Статус:** Открытый. Минимум — документировать ожидаемый `$data` в комментарии компонента.
 
-### 5. `source/` в git — порог перехода на Git LFS
+### 3. `source/` в git — порог перехода на Git LFS
 **Проблема:** 500 объектов × оригинальные фото = потенциально сотни МБ в истории. Удалить без `git filter-branch` невозможно.  
 **Решение:** Установить порог явно. Предложение: при превышении 100 МБ в `source/` — переходить на LFS.  
 **Статус:** Открытый. Решение нужно до начала загрузки фото объектов.
@@ -171,12 +161,9 @@ $componentBaseId = basename(__DIR__); // e.g. "hero"
 
 ### CSS Scoped Isolation
 
-При сборке `build.php` парсит `components/{name}/style.css` и оборачивает все правила в `.c-{name}`:
+Классы компонента пишутся сразу в скоупе `.c-{name}` (соглашение, решение 2026-09-22). `build.php` ничего не оборачивает:
 ```css
-/* Исходник в components/hero/style.css */
-.title { font-size: 2rem }
-
-/* После build.php */
+/* components/hero/style.css — так и остаётся */
 .c-hero .title { font-size: 2rem }
 ```
 
@@ -263,7 +250,7 @@ function initHero(element) {
 | 2026-05-02 | Карта: MapLibre GL + PMTiles (автономность) |
 | 2026-05-02 | Schema.org: генерируется программно из webforge.json при build |
 | 2026-05-02 | Favicon: 6 файлов (SVG+ICO+180+192+512+manifest) |
-| 2026-05-02 | CSS scoped: auto-wrap `.c-{name}` при сборке |
+| 2026-05-02 | CSS scoped: auto-wrap `.c-{name}` при сборке (заменено решением 2026-09-22) |
 | 2026-05-03 | Медиапайплайн: прототип реализован в Zavodsvay-Static (портирование в WebForge после стабилизации) |
 | 2026-05-03 | GIF (вкл. аним) → аним WebP через `sharp({animated:true})` |
 | 2026-05-03 | `orig_width`/`orig_height` в реестре → нулевой CLS |
@@ -272,3 +259,6 @@ function initHero(element) {
 | 2026-05-03 | Hashed assets (`style.{hash8}.css`) при build — cache-busting без CDN |
 | 2026-05-03 | `source/` в git; порог перехода на Git LFS — 100 МБ |
 | 2026-05-03 | Компонент обязан документировать контракт `$data` в PHPDoc-комментарии |
+| 2026-09-22 | CSS-нейминг: scoped-классы пишутся сразу (`c-{name}__element`), авто-обёртка при сборке не нужна (закрыты вопросы 2–3) |
+| 2026-09-22 | Первые компоненты — порт Blocks Storefront UI (идеи MIT, код с нуля, без зависимости): `product-card`, `filters`, хелпер `tools/pagination.php` |
+| 2026-09-22 | Пример SSOT `webforge.example.json` + `assets/css/global.css` до готовности генератора |

@@ -1,0 +1,17 @@
+/* components/filters/style.css — mobile-first от 320px, скоуп .c-filters изначально. */
+.c-filters { width: 100%; max-width: 23.5rem; font-size: 0.875rem; }
+.c-filters__group { border-bottom: 1px solid var(--color-neutral-200); }
+.c-filters__summary { cursor: pointer; font-weight: 600; padding: 0.75rem 0.5rem; list-style: none; }
+.c-filters__summary::-webkit-details-marker { display: none; }
+.c-filters__summary::after { content: "›"; float: right; transform: rotate(90deg); color: var(--color-neutral-500); }
+details[open] > .c-filters__summary::after { transform: rotate(-90deg); }
+.c-filters__list { list-style: none; margin: 0 0 1rem; padding: 0; display: grid; gap: 0.25rem; }
+.c-filters__list--chips { grid-template-columns: repeat(4, 1fr); gap: 0.5rem; }
+.c-filters__label { display: flex; align-items: center; gap: 0.5rem; padding: 0.25rem; cursor: pointer; border-radius: 0.375rem; }
+.c-filters__label:hover { background: var(--color-neutral-100); }
+.c-filters__input { width: 1rem; height: 1rem; accent-color: var(--color-primary-600); }
+.c-filters__counter { color: var(--color-neutral-500); font-size: 0.75rem; }
+.c-filters__actions { display: flex; gap: 0.75rem; margin-top: 1rem; }
+.c-filters__clear, .c-filters__submit { flex: 1; padding: 0.625rem; border-radius: var(--radius); font-size: 0.875rem; cursor: pointer; }
+.c-filters__clear { background: #fff; border: 1px solid var(--color-neutral-200); }
+.c-filters__submit { background: var(--color-primary-600); color: #fff; border: 0; }

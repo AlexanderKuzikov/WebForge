@@ -34,7 +34,7 @@ git clone https://github.com/AlexanderKuzikov/WebForge.git
 
 ## Статус
 
-**Архитектура определена.** Генераторы (webforge_php_generator.php, build.php) ещё не написаны. 5 open-вопросов.
+**Архитектура определена.** Первые компоненты готовы (product-card, filters, пагинация). Генераторы (webforge_php_generator.php, build.php) ещё не написаны. 3 open-вопроса.
 
 ## Лицензия
 
